@@ -14,8 +14,7 @@ import retrofit2.http.QueryMap;
  */
 
 public interface Interface {
-     @GET("/weather?lat={lat}&lon={lon}&appid=f1711bf6fbee00fd83c6de3a48dcbcc5")
-     Call<Main> getUser(@Path("username") String username);
+     //@GET("/weather?lat={lat}&lon={lon}&appid=f1711bf6fbee00fd83c6de3a48dcbcc5")
 
      @GET("weather")
     Call<WeatherApi> getApi (@QueryMap Map<String,String> params);

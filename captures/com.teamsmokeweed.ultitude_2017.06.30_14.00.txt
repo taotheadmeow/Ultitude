@@ -1,0 +1,51 @@
+Applications Memory Usage (in Kilobytes):
+Uptime: 92256758 Realtime: 216503922
+
+** MEMINFO in pid 4730 [com.teamsmokeweed.ultitude] **
+                   Pss  Private  Private  SwapPss     Heap     Heap     Heap
+                 Total    Dirty    Clean    Dirty     Size    Alloc     Free
+                ------   ------   ------   ------   ------   ------   ------
+  Native Heap     5783     5728        0        0    14336     9344     4991
+  Dalvik Heap     4999     4976        0        0     7721     4633     3088
+ Dalvik Other     1773     1772        0        0                           
+        Stack      496      496        0        0                           
+       Ashmem        2        0        0        0                           
+      Gfx dev     3220     3220        0        0                           
+    Other dev        4        0        4        0                           
+     .so mmap     4685      240     1400       41                           
+    .jar mmap        0        0        0        0                           
+    .apk mmap      724      456       44        0                           
+    .ttf mmap      415        0      356        0                           
+    .dex mmap     2873     2768      100        0                           
+    .oat mmap     1725        0      276        0                           
+    .art mmap     1605      872      124        4                           
+   Other mmap       41        4       20        0                           
+   EGL mtrack    14112    14112        0        0                           
+      Unknown      363      344        0        2                           
+        TOTAL    42867    34988     2324       47    22057    13977     8079
+ 
+ App Summary
+                       Pss(KB)
+                        ------
+           Java Heap:     5972
+         Native Heap:     5728
+                Code:     5640
+               Stack:      496
+            Graphics:    17332
+       Private Other:     2144
+              System:     5555
+ 
+               TOTAL:    42867       TOTAL SWAP PSS:       47
+ 
+ Objects
+               Views:       56         ViewRootImpl:        1
+         AppContexts:        3           Activities:        2
+              Assets:        2        AssetManagers:        2
+       Local Binders:       14        Proxy Binders:       18
+       Parcel memory:        3         Parcel count:       12
+    Death Recipients:        0      OpenSSL Sockets:        0
+ 
+ SQL
+         MEMORY_USED:        0
+  PAGECACHE_OVERFLOW:        0          MALLOC_SIZE:        0
+ 
