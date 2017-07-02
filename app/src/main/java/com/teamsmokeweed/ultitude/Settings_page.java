@@ -4,7 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.icu.text.DecimalFormat;
+
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -12,9 +12,12 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.RelativeLayout;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import java.text.DecimalFormat;
 
 public class Settings_page extends AppCompatActivity {
     double sealvlpress = 1013.25;
@@ -28,8 +31,7 @@ public class Settings_page extends AppCompatActivity {
     EditText latInput;
     EditText lonInput;
     EditText slpInput;
-    EditText sensorFineTuneInput;
-    TextView slpview;
+    TextView sensorOffset;
     TextView coordview;
 
     @Override
@@ -57,15 +59,22 @@ public class Settings_page extends AppCompatActivity {
         latInput = (EditText) findViewById(R.id.latInput);
         lonInput = (EditText) findViewById(R.id.lonInput);
         slpInput = (EditText) findViewById(R.id.slpEdit);
-        sensorFineTuneInput = (EditText) findViewById(R.id.fineTuneEdit);
+        sensorOffset = (TextView) findViewById(R.id.sensorOffset);
+        //sensorFineTuneInput = (EditText) findViewById(R.id.fineTuneEdit);
 
         //setting from pref
         autoSlpSw.setChecked(!manualslp);
         autoLocationSw.setChecked(autoLocation);
-        slpInput.setText(""+sealvlpress);
-        latInput.setText(""+location[0]);
-        lonInput.setText(""+location[1]);
-        sensorFineTuneInput.setText(new DecimalFormat("#.00").format(sensorFineTune));
+        slpInput.setText(new DecimalFormat("0.00").format(sealvlpress));
+        latInput.setText(new DecimalFormat("0.00").format(location[0]));
+        lonInput.setText(new DecimalFormat("0.00").format(location[1]));
+        if(sensorFineTune >= 0){
+            sensorOffset.setText("+"+new DecimalFormat("0.00").format(sensorFineTune));
+        }
+        else{
+            sensorOffset.setText(new DecimalFormat("0.00").format(sensorFineTune));
+        }
+        //sensorFineTuneInput.setText(new DecimalFormat("#.00").format(sensorFineTune));
 
 
         setSupportActionBar(settingTitlebar);
@@ -76,6 +85,15 @@ public class Settings_page extends AppCompatActivity {
                 Intent returnIntent = new Intent();
                 setResult(Activity.RESULT_CANCELED,returnIntent);
                 finish();
+            }
+        });
+
+        RelativeLayout calibMenu = (RelativeLayout) findViewById(R.id.calib);
+        calibMenu.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent k = new Intent(Settings_page.this, Activity_calibrate.class);
+                startActivityForResult(k, 1);
             }
         });
 
@@ -91,16 +109,20 @@ public class Settings_page extends AppCompatActivity {
         switch (item.getItemId()) {
             case R.id.apply_settings:
                 // Put Everything xD
-                sp.edit().putBoolean("manualslp", !(autoSlpSw.isChecked())).apply();
-                sp.edit().putBoolean("autoLocation", autoLocationSw.isChecked()).apply();
-                sp.edit().putFloat("sealvlpress", Float.parseFloat(slpInput.getText().toString())).apply();
-                sp.edit().putFloat("lat", Float.parseFloat(latInput.getText().toString())).apply();
-                sp.edit().putFloat("lon", Float.parseFloat(lonInput.getText().toString())).apply();
-                sp.edit().putFloat("sensorFineTune", Float.parseFloat(sensorFineTuneInput.getText().toString())).apply();
-                Toast.makeText(getApplicationContext(), "Settings applied", Toast.LENGTH_SHORT).show();
-                Intent returnIntent = new Intent();
-                setResult(Activity.RESULT_OK,returnIntent);
-                finish();
+                try {
+                    sp.edit().putBoolean("manualslp", !(autoSlpSw.isChecked())).apply();
+                    sp.edit().putBoolean("autoLocation", autoLocationSw.isChecked()).apply();
+                    sp.edit().putFloat("sealvlpress", Float.parseFloat(slpInput.getText().toString())).apply();
+                    sp.edit().putFloat("lat", Float.parseFloat(latInput.getText().toString())).apply();
+                    sp.edit().putFloat("lon", Float.parseFloat(lonInput.getText().toString())).apply();
+                    //sp.edit().putFloat("sensorFineTune", ).apply();
+                    Toast.makeText(getApplicationContext(), "Settings applied!", Toast.LENGTH_SHORT).show();
+                    Intent returnIntent = new Intent();
+                    setResult(Activity.RESULT_OK, returnIntent);
+                    finish();
+                }catch (Exception e){
+                    Toast.makeText(getApplicationContext(), "You can't leave field blank! Go, check it out", Toast.LENGTH_SHORT).show();
+                }
                 return true;
 
 
@@ -109,6 +131,24 @@ public class Settings_page extends AppCompatActivity {
                 // Invoke the superclass to handle it.
                 return super.onOptionsItemSelected(item);
 
+        }
+    }
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+        if (requestCode == 1) {
+            if(resultCode == Activity.RESULT_OK){
+                sensorFineTune = (double)sp.getFloat("sensorFineTune", 0.00f);
+                if(sensorFineTune >= 0){
+                    sensorOffset.setText("+"+new DecimalFormat("0.00").format(sensorFineTune));
+                }
+                else {
+                    sensorOffset.setText(new DecimalFormat("0.00").format(sensorFineTune));
+                }
+            }
+            if (resultCode == Activity.RESULT_CANCELED) {
+                //Write your code if there's no result
+            }
         }
     }
 }

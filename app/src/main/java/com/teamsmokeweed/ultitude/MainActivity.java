@@ -36,6 +36,7 @@ import static android.R.attr.id;
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
     double sealvlpress = 1013.25;
+    double currentPressure;
     String sensorName;
     TextView statusView;
     boolean manualslp;
@@ -60,6 +61,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         location[1] = (double) sp.getFloat("lon", 100.51f);
         sensorFineTune = (double) sp.getFloat("sensorFineTune", 0.00f);
         useMetric = sp.getBoolean("useMetric", true);
+        sp.getFloat("currentPressure", 0.00f);
 
         //Look for barometer sensor
         SensorManager snsMgr = (SensorManager) getSystemService(Service.SENSOR_SERVICE);
@@ -94,7 +96,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 sp.edit().putBoolean("useMetric", false).apply();
             }
         });
-                t = new Thread() {
+
+        t = new Thread() {
             @Override
             public void run() {
                 try {
@@ -103,15 +106,16 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
+                                getLocation(autoLocation);
+                                getApi();
                                 if (isFinishing() || manualslp) {
                                     t.interrupt();
                                 }
-                                getLocation(autoLocation);
-                                getApi();
                             }
                         });
                     }
                 } catch (InterruptedException e) {
+
                 }
             }
         };
@@ -121,7 +125,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         else {
             getLocation(autoLocation);
             getApi();
-            if(t.isInterrupted()){
+            if(t.isInterrupted() || !t.isAlive()){
                 t.start();
             }
         }
@@ -147,13 +151,14 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         TextView altitudeView = (TextView) findViewById(R.id.altitude);
         TextView sealvlView = (TextView) findViewById(R.id.SeaLvPress);
         //calibrate
-        if(!manualslp && t.isInterrupted()){
+        currentPressure = values[0];
+        if(!manualslp && (t.isInterrupted() || !t.isAlive())){
             t.start();
         }
         pressView.setText((new DecimalFormat("##.0").format(values[0]+(double) sp.getFloat("sensorFineTune", 0.00f))));
         double pressure = Double.parseDouble(pressView.getText().toString())+(double) sp.getFloat("sensorFineTune", 0.00f);
         altitudeView.setText(new DecimalFormat("##,###").format(pressureConvert(pressure, sealvlpress)));
-        sealvlView.setText("" + sealvlpress);
+        sealvlView.setText(String.format("%.1f", sealvlpress));
 
     }
 
@@ -178,6 +183,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         switch (item.getItemId()) {
             case R.id.action_settings:
                 // User chose the "Settings" item, show the app settings UI...
+                sp.edit().putFloat("currentPressure", (float)currentPressure).apply();
                 Intent k = new Intent(this, Settings_page.class);
                 startActivityForResult(k, 1);
 
@@ -204,17 +210,26 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 if(!manualslp) {
                     getLocation(autoLocation);
                     getApi();
-                    if (t.isInterrupted()) {
+                    if (t.isInterrupted() || !t.isAlive()) {
                         t.start();
                     }
                 }
                 else {
-
                     setManualSLP();
                 }
                 }
             if (resultCode == Activity.RESULT_CANCELED) {
                 //Write your code if there's no result
+                if(!manualslp) {
+                    getLocation(autoLocation);
+                    getApi();
+                    if (!t.isAlive()) {
+                        t.start();
+                    }
+                }
+                else {
+                    setManualSLP();
+                }
             }
         }
     }
