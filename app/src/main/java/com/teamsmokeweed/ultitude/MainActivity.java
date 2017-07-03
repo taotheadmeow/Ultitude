@@ -1,17 +1,14 @@
 package com.teamsmokeweed.ultitude;
 
-import android.Manifest;
 import android.app.Activity;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.PorterDuff;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.location.LocationListener;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -20,9 +17,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
-
-
 import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Map;
@@ -32,7 +26,6 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-import static android.R.attr.id;
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
     double sealvlpress = 1013.25;
@@ -155,11 +148,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         if(!manualslp && (t.isInterrupted() || !t.isAlive())){
             t.start();
         }
-        pressView.setText((new DecimalFormat("##.0").format(values[0]+(double) sp.getFloat("sensorFineTune", 0.00f))));
-        double pressure = Double.parseDouble(pressView.getText().toString())+(double) sp.getFloat("sensorFineTune", 0.00f);
-        altitudeView.setText(new DecimalFormat("##,###").format(pressureConvert(pressure, sealvlpress)));
-        sealvlView.setText(String.format("%.1f", sealvlpress));
 
+        double pressure = currentPressure + (double) sp.getFloat("sensorFineTune", 0.00f);
+        pressView.setText((new DecimalFormat("##.0").format(pressure)));
+        sealvlView.setText((new DecimalFormat("##.0").format(sealvlpress)));
+        altitudeView.setText(new DecimalFormat("##,###").format(pressureConvert(pressure, sealvlpress)));
     }
 
     double pressureConvert(double currentPressure, double SeaLvPressure) {
@@ -265,7 +258,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             @Override
             public void onResponse(Call<WeatherApi> call, Response<WeatherApi> response) {
                 try {
-                    sealvlpress = response.body().getMain().getPressure();
+                    try {
+                        sealvlpress = response.body().getMain().getSeaLevel();
+                    } catch (NullPointerException e){
+                        sealvlpress = response.body().getMain().getPressure();
+                    }
                     statusView.setText("Connected. Using SLP at: "+ new DecimalFormat("#.##").format(location[0])+", "+new DecimalFormat("#.##").format(location[1]));
                     indicatorView.setImageResource(R.drawable.ic_green_dot_24dp);
                 }catch (NullPointerException e){
@@ -283,7 +280,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                // Toast.makeText(MainActivity.this, "Fail: "+t.getMessage(), Toast.LENGTH_SHORT).show();
                 // Log.e("TAG", "onFailure: "+ t.getMessage().toString());
                 sealvlpress = (double) sp.getFloat("sealvlpress", 1013.25f);
-                statusView.setText("Offline. Using custom SLP.");
+                statusView.setText("Oh we can't obtain SLP from internet. Using custom SLP. ");
                 indicatorView.setImageResource(R.drawable.ic_dot_24dp);
             }
         });
@@ -294,6 +291,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         t.interrupt();
         finish(); // finish activity
         }
+
 
 
 

@@ -1,5 +1,5 @@
 
-package com.teamsmokeweed.ultitude;
+package com.teamsmokeweed;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
