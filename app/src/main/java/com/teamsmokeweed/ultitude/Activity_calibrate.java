@@ -77,7 +77,7 @@ public class Activity_calibrate extends AppCompatActivity {
 
                     sensorFineTune = Math.abs(sensorFineTune) - currentPressure;
                     compIo.setText(new DecimalFormat("0.00").format(sensorFineTune));
-                }catch (NullPointerException e){
+                }catch (Exception e){
                     Toast.makeText(getApplicationContext(), "Error: can't calculate!", Toast.LENGTH_SHORT).show();
                 }
             }
@@ -85,10 +85,15 @@ public class Activity_calibrate extends AppCompatActivity {
         okbtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                sp.edit().putFloat("sensorFineTune", Float.parseFloat(compIo.getText().toString())).apply();
-                Intent returnIntent = new Intent();
-                setResult(Activity.RESULT_OK,returnIntent);
-                finish();
+                try {
+                    sp.edit().putFloat("sensorFineTune", Float.parseFloat(compIo.getText().toString())).apply();
+                    Intent returnIntent = new Intent();
+                    setResult(Activity.RESULT_OK,returnIntent);
+                    finish();
+                }catch (Exception e){
+                    Toast.makeText(getApplicationContext(), "Oh! Can't apply! Please check compensation field!", Toast.LENGTH_SHORT).show();
+                }
+
             }
         });
     }
