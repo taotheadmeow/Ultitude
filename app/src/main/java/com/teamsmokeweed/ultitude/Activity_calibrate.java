@@ -67,15 +67,16 @@ public class Activity_calibrate extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 try {
+                    double calculatedPressure;
                     double alt = Double.parseDouble(knowAltIn.getText().toString());
                     double slp = Double.parseDouble(knowSlpIn.getText().toString());
                     if (alt / (145366.45 * 0.348) - 1.0 < 0) {
-                        sensorFineTune = -Math.pow(-(alt / (145366.45 * 0.348) - 1.0), 1 / 0.190284) * slp;
+                        calculatedPressure = -Math.pow(-(alt / (145366.45 * 0.348) - 1.0), 1 / 0.190284) * slp;
                     } else {
-                        sensorFineTune = Math.pow(alt / (145366.45 * 0.348) - 1.0, 1 / 0.190284) * slp;
+                        calculatedPressure = Math.pow(alt / (145366.45 * 0.348) - 1.0, 1 / 0.190284) * slp;
                     }
 
-                    sensorFineTune = Math.abs(sensorFineTune) - currentPressure;
+                    sensorFineTune = Math.abs(calculatedPressure) - Double.parseDouble(currentPressIn.getText().toString());
                     compIo.setText(new DecimalFormat("0.00").format(sensorFineTune));
                 }catch (Exception e){
                     Toast.makeText(getApplicationContext(), "Error: can't calculate!", Toast.LENGTH_SHORT).show();
